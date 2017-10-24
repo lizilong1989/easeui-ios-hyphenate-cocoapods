@@ -12,7 +12,7 @@
 
 #import "EaseBaseMessageCell.h"
 
-#import "UIImageView+WebCache.h"
+#import "UIImageView+LongCache.h"
 
 @interface EaseBaseMessageCell()
 
@@ -260,7 +260,7 @@
     [super setModel:model];
     
     if (model.avatarURLPath) {
-        [self.avatarView sd_setImageWithURL:[NSURL URLWithString:model.avatarURLPath] placeholderImage:model.avatarImage];
+        [self.avatarView setImageWithUrl:model.avatarURLPath placeholderImage:model.avatarImage];
     } else {
         self.avatarView.image = model.avatarImage;
     }

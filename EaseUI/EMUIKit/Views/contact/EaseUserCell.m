@@ -13,7 +13,7 @@
 #import "EaseUserCell.h"
 
 #import "EaseImageView.h"
-#import "UIImageView+WebCache.h"
+#import "UIImageView+LongCache.h"
 
 CGFloat const EaseUserCellPadding = 10;
 
@@ -144,7 +144,7 @@ CGFloat const EaseUserCellPadding = 10;
     }
     
     if ([_model.avatarURLPath length] > 0){
-        [self.avatarView.imageView sd_setImageWithURL:[NSURL URLWithString:_model.avatarURLPath] placeholderImage:_model.avatarImage];
+        [self.avatarView.imageView setImageWithUrl:_model.avatarURLPath placeholderImage:_model.avatarImage];
     } else {
         if (_model.avatarImage) {
             self.avatarView.image = _model.avatarImage;

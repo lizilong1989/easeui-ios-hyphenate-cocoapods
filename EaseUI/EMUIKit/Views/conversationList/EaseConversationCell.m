@@ -17,7 +17,7 @@
 #else
 #import <Hyphenate/EMConversation.h>
 #endif
-#import "UIImageView+WebCache.h"
+#import "UIImageView+LongCache.h"
 
 CGFloat const EaseConversationCellPadding = 10;
 
@@ -206,7 +206,7 @@ CGFloat const EaseConversationCellPadding = 10;
     
     if (self.showAvatar) {
         if ([_model.avatarURLPath length] > 0){
-            [self.avatarView.imageView sd_setImageWithURL:[NSURL URLWithString:_model.avatarURLPath] placeholderImage:_model.avatarImage];
+            [self.avatarView.imageView setImageWithUrl:_model.avatarURLPath placeholderImage:_model.avatarImage];
         } else {
             if (_model.avatarImage) {
                 self.avatarView.image = _model.avatarImage;

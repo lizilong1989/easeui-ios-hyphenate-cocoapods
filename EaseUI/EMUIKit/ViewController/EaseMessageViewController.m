@@ -23,9 +23,9 @@
 #import "EaseEmoji.h"
 #import "EaseEmotionEscape.h"
 #import "EaseCustomMessageCell.h"
-#import "UIImage+GIF.h"
 #import "EaseLocalDefine.h"
 #import "EaseSDKHelper.h"
+#import "LongGifImage.h"
 
 #define KHintAdjustY    50
 
@@ -1062,7 +1062,7 @@ typedef enum : NSUInteger {
                 if (_dataSource && [_dataSource respondsToSelector:@selector(emotionURLFormessageViewController:messageModel:)]) {
                     EaseEmotion *emotion = [_dataSource emotionURLFormessageViewController:self messageModel:model];
                     if (emotion) {
-                        model.image = [UIImage sd_animatedGIFNamed:emotion.emotionOriginal];
+                        model.image = [LongGifImage imageNamed:emotion.emotionOriginal];
                         model.fileURLPath = emotion.emotionOriginalURL;
                     }
                 }
