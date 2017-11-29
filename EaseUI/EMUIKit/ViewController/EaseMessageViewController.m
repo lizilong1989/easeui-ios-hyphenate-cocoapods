@@ -776,54 +776,47 @@ typedef enum : NSUInteger {
     EMImageMessageBody *imageBody = (EMImageMessageBody*)[model.message body];
     
     if ([imageBody type] == EMMessageBodyTypeImage) {
-        if (imageBody.thumbnailDownloadStatus == EMDownloadStatusSuccessed) {
-            if (imageBody.downloadStatus == EMDownloadStatusSuccessed)
-            {
-                //send the acknowledgement
-                [weakSelf _sendHasReadResponseForMessages:@[model.message] isRead:YES];
-                NSString *localPath = model.message == nil ? model.fileLocalPath : [imageBody localPath];
-                if (localPath && localPath.length > 0) {
-                    UIImage *image = [UIImage imageWithContentsOfFile:localPath];
-                    if (image) {
-                        [[EaseMessageReadManager defaultManager] showBrowserWithImages:@[image]];
-                        return;
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            NSMutableArray *array = [NSMutableArray array];
+            dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+            [_conversation loadMessagesWithType:EMMessageBodyTypeImage timestamp:model.message.timestamp count:10 fromUser:nil searchDirection:EMMessageSearchDirectionUp completion:^(NSArray *aMessages, EMError *aError) {
+                if (!aError) {
+                    for (EMMessage *msg in aMessages) {
+                        NSString *remotePath = [(EMImageMessageBody*)msg.body remotePath];
+                        if (remotePath && remotePath.length > 0) {
+                            [array addObject:remotePath];
+                        }
                     }
                 }
+                dispatch_semaphore_signal(semaphore);
+            }];
+            
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+            NSInteger index = [array count];
+            //send the acknowledgement
+            [weakSelf _sendHasReadResponseForMessages:@[model.message] isRead:YES];
+            NSString *remotePath = [imageBody remotePath];
+            if (remotePath && remotePath.length > 0) {
+                [array addObject:remotePath];
             }
             
-            [weakSelf showHudInView:weakSelf.view hint:NSEaseLocalizedString(@"message.downloadingImage", @"downloading a image...")];
-            [[EMClient sharedClient].chatManager downloadMessageAttachment:model.message progress:nil completion:^(EMMessage *message, EMError *error) {
-                [weakSelf hideHud];
-                if (!error) {
-                    //send the acknowledgement
-                    [weakSelf _sendHasReadResponseForMessages:@[model.message] isRead:YES];
-                    NSString *localPath = message == nil ? model.fileLocalPath : [(EMImageMessageBody*)message.body localPath];
-                    if (localPath && localPath.length > 0) {
-                        UIImage *image = [UIImage imageWithContentsOfFile:localPath];
-                        //                                weakSelf.isScrollToBottom = NO;
-                        if (image)
-                        {
-                            [[EaseMessageReadManager defaultManager] showBrowserWithImages:@[image]];
+            [_conversation loadMessagesWithType:EMMessageBodyTypeImage timestamp:model.message.timestamp count:10 fromUser:nil searchDirection:EMMessageSearchDirectionDown completion:^(NSArray *aMessages, EMError *aError) {
+                if (!aError) {
+                    for (EMMessage *msg in aMessages) {
+                        NSString *remotePath = [(EMImageMessageBody*)msg.body remotePath];
+                        if (remotePath && remotePath.length > 0) {
+                            [array addObject:remotePath];
                         }
-                        else
-                        {
-                            NSLog(@"Read %@ failed!", localPath);
-                        }
-                        return ;
                     }
                 }
-                [weakSelf showHint:NSEaseLocalizedString(@"message.imageFail", @"image for failure!")];
+                dispatch_semaphore_signal(semaphore);
             }];
-        }else{
-            //get the message thumbnail
-            [[EMClient sharedClient].chatManager downloadMessageThumbnail:model.message progress:nil completion:^(EMMessage *message, EMError *error) {
-                if (!error) {
-                    [weakSelf _reloadTableViewDataWithMessage:model.message];
-                }else{
-                    [weakSelf showHint:NSEaseLocalizedString(@"message.thumImageFail", @"thumbnail for failure!")];
-                }
-            }];
-        }
+            
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[EaseMessageReadManager defaultManager] showBrowserWithImages:array index:index];
+            });
+        });
     }
 }
 

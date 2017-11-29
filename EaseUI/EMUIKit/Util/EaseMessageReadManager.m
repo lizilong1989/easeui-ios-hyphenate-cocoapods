@@ -79,6 +79,13 @@ static EaseMessageReadManager *detailInstance = nil;
     }
 }
 
+- (void)showBrowserWithImages:(NSArray *)imageArray index:(NSInteger)index
+{
+    if (imageArray && [imageArray count] > 0) {
+        [[LongPhotoBrowser sharedInstance] showWithUrls:imageArray withIndex:index];
+    }
+}
+
 - (BOOL)prepareMessageAudioModel:(EaseMessageModel *)messageModel
                       updateViewCompletion:(void (^)(EaseMessageModel *prevAudioModel, EaseMessageModel *currentAudioModel))updateCompletion
 {

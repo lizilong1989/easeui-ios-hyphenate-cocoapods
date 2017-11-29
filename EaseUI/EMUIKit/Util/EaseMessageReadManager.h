@@ -37,6 +37,8 @@ typedef void (^PlayBlock)(BOOL playing, EaseMessageModel *messageModel);
  */
 - (void)showBrowserWithImages:(NSArray *)imageArray;
 
+- (void)showBrowserWithImages:(NSArray *)imageArray index:(NSInteger)index;
+
 /*!
  @method
  @brief 语音消息是否可以播放
